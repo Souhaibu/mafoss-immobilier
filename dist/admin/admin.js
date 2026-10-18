@@ -16,8 +16,8 @@ let properties=[],requests=[],editing=null,routedUser,toastTimer;
 
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3500)}
 function show(view){for(const id of ['admin-loading','login-view','denied-view','app-view'])$('#'+id).hidden=id!==view}
-// Les images du dossier assets/ sont un niveau au-dessus de cette page.
-function preview(p){const src=imageSrc(p);return src.startsWith('assets/')?'../'+src:src}
+// Chemins absolus : la page fonctionne avec ou sans barre finale (/admin ou /admin/).
+function preview(p){const src=imageSrc(p);return src.startsWith('assets/')?'/'+src:src}
 // Chemin d'un fichier de notre bucket à partir de son URL publique, sinon null.
 function storagePath(url){const marker=`/storage/v1/object/public/${BUCKET}/`,i=(url||'').indexOf(marker);return url&&url.startsWith(SUPABASE_URL)&&i>=0?decodeURIComponent(url.slice(i+marker.length)):null}
 function readableError(error){

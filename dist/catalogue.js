@@ -1,4 +1,5 @@
-// Toutes les données de ce catalogue sont fictives. Aucun bien n'est commercialisé.
+// Le catalogue affiché vient de Supabase (table properties). Ces fiches fictives sont les données de départ
+// importées dans la base ; elles servent aussi aux tests. Aucun bien n'est commercialisé.
 export const properties = [
   {id:'demo-01',title:'Villa aux lignes solaires',region:'Dakar',city:'Dakar',district:'Almadies',type:'Villa',transaction:'Vente',price:385000000,area:420,rooms:5,baths:4,image:'villa-concept.webp',visual:'Illustration IA',feature:'Terrasse & jardin',description:'Une villa fictive organisée autour de terrasses ombragées et d’un jardin tropical. Pierre claire, bois et larges ouvertures composent cette exploration de l’habitat dakarois.'},
   {id:'demo-02',title:'L’appartement avec horizon',region:'Dakar',city:'Dakar',district:'Mermoz',type:'Appartement',transaction:'Vente',price:145000000,area:185,rooms:3,baths:2,image:'apartment-concept.webp',visual:'Illustration IA',feature:'Terrasse ouverte',description:'Un appartement fictif imaginé pour une vie citadine lumineuse : espace de réception ouvert, terrasse protégée du soleil et matières naturelles.'},
@@ -14,6 +15,25 @@ export const geography={Dakar:{Dakar:['Almadies','Ngor','Mermoz','Sacré-Cœur',
 export function filterProperties(items,filters={},favorites=[]){
   const min=(v)=>v===''||v==null?null:Number(v);
   return items.filter(p=> (!filters.transaction||p.transaction===filters.transaction)&&(!filters.region||p.region===filters.region)&&(!filters.city||p.city===filters.city)&&(!filters.district||p.district===filters.district)&&(!filters.districts||filters.districts.includes(p.district))&&(!filters.type||p.type===filters.type)&&(min(filters.budget)===null||p.price<=Number(filters.budget))&&(min(filters.budgetMin)===null||p.price>=Number(filters.budgetMin))&&(min(filters.areaMin)===null||p.area>=Number(filters.areaMin))&&(min(filters.areaMax)===null||p.area<=Number(filters.areaMax))&&(!filters.favorites||favorites.includes(p.id)));
+}
+// Les annonces viennent de la base : tout texte inséré dans le HTML doit être échappé.
+export function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+// Ajoute aux listes de filtres les régions, villes et quartiers présents dans les annonces.
+export function mergeGeography(base,items){
+  const merged=Object.fromEntries(Object.entries(base).map(([region,cities])=>[region,Object.fromEntries(Object.entries(cities).map(([city,d])=>[city,[...d]]))]));
+  for(const p of items){
+    const cities=merged[p.region]??={};const districts=cities[p.city]??=[];
+    if(p.district&&!districts.includes(p.district))districts.push(p.district);
+  }
+  return merged;
+}
+// Image d'une annonce : fichier du dossier assets/ ou URL https (stockage Supabase). Tout le reste est ignoré.
+export function imageSrc(p){
+  if(/^https:\/\//.test(p.image||''))return p.image;
+  if(/^[\w.-]+$/.test(p.image||''))return `assets/${p.image}`;
+  return 'assets/residence-concept.svg';
 }
 export function validateFilters(f){
   if(f.budget!==''&&f.budgetMin!==''&&Number(f.budgetMin)>Number(f.budget))return 'Le budget minimum doit être inférieur ou égal au budget maximum.';

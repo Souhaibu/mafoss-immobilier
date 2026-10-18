@@ -1,20 +1,18 @@
-// Moteur orthographique de géométrie 3D, rendu Canvas 2D sans dépendance.
+// Moteur 3D WebGL orthographique sans dépendance, avec tampon de profondeur.
 // Il dessine uniquement sur interaction ou redimensionnement (aucune boucle au repos).
 export function initResidence(canvas){
-  const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas indisponible');
+  const gl=canvas.getContext('webgl',{alpha:true,antialias:true});if(!gl)throw new Error('WebGL indisponible');
+  const shader=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error('Shader 3D indisponible');return s};
+  const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,'attribute vec3 position; attribute vec3 color; varying vec3 tint; void main(){gl_Position=vec4(position,1.0);tint=color;}'));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,'precision mediump float; varying vec3 tint; uniform vec3 lighting; void main(){gl_FragColor=vec4(tint*lighting,1.0);}'));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Programme 3D indisponible');gl.useProgram(program);
+  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);const pos=gl.getAttribLocation(program,'position'),col=gl.getAttribLocation(program,'color');gl.enableVertexAttribArray(pos);gl.enableVertexAttribArray(col);gl.vertexAttribPointer(pos,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(col,3,gl.FLOAT,false,24,12);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
+  const light=gl.getUniformLocation(program,'lighting');
   let yaw=-.57,pitch=.55,zoom=1,roof=true,evening=false,w=0,h=0,frame=0,drag=null;
   const scene=[];
   const colors={stone:'#e1d4b7',sand:'#d5c7aa',wall:'#f0e5ce',wood:'#947247',glass:'#36585c',leaf:'#648165',trunk:'#99805b'};
   function face(points,color,kind='building',stroke=null){scene.push({points,color,kind,stroke})}
-  function quad(points,color,kind){
-    const [a,b,,d]=points,u=b.map((v,i)=>v-a[i]),v=d.map((n,i)=>n-a[i]);
-    const nx=Math.max(1,Math.ceil(Math.hypot(...u)/.8)),ny=Math.max(1,Math.ceil(Math.hypot(...v)/.8));
-    const at=(x,y)=>a.map((n,i)=>n+u[i]*x+v[i]*y);
-    for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)face([at(x/nx,y/ny),at((x+1)/nx,y/ny),at((x+1)/nx,(y+1)/ny),at(x/nx,(y+1)/ny)],color,kind);
-  }
   function box(x,y,z,sx,sy,sz,color,kind='building'){
     const a=[x,y,z],b=[x+sx,y,z],c=[x+sx,y,z+sz],d=[x,y,z+sz],e=[x,y+sy,z],f=[x+sx,y+sy,z],g=[x+sx,y+sy,z+sz],i=[x,y+sy,z+sz];
-    quad([a,b,f,e],shade(color,.94),kind);quad([b,c,g,f],shade(color,.77),kind);quad([c,d,i,g],shade(color,.86),kind);quad([d,a,e,i],shade(color,.88),kind);quad([e,f,g,i],shade(color,1.07),kind);
+    face([a,b,f,e],shade(color,.94),kind);face([b,c,g,f],shade(color,.77),kind);face([c,d,i,g],shade(color,.86),kind);face([d,a,e,i],shade(color,.88),kind);face([e,f,g,i],shade(color,1.07),kind);
   }
   function shade(hex,f){const n=parseInt(hex.slice(1),16),v=[n>>16,(n>>8)&255,n&255].map(x=>Math.min(255,Math.round(x*f)));return `rgb(${v.join(',')})`}
   function leaf(x,y,z,r,angle,len){const dx=Math.cos(angle),dz=Math.sin(angle);const points=[[x,y,z],[x+dx*len*.48-dz*r,y+.28,z+dz*len*.48+dx*r],[x+dx*len,y-.6,z+dz*len],[x+dx*len*.48+dz*r,y+.28,z+dz*len*.48-dx*r]];face(points,angle%1>.5?'#597853':'#769569','plant')}
@@ -71,18 +69,14 @@ export function initResidence(canvas){
   }
   build();
   function project(p){const x=p[0]*Math.cos(yaw)-p[2]*Math.sin(yaw),z=p[0]*Math.sin(yaw)+p[2]*Math.cos(yaw);const scale=Math.min(w/25,h/18)*zoom;return [w/2+x*scale,h*.64+(-z*Math.sin(pitch)-p[1]*Math.cos(pitch))*scale,z*Math.cos(pitch)-p[1]*Math.sin(pitch)]}
-  function polygon(points,fill,stroke){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.5;ctx.stroke()}}
-  function draw(){frame=0;ctx.clearRect(0,0,w,h);if(evening){const grad=ctx.createLinearGradient(0,0,w,h);grad.addColorStop(0,'#8f9c9b');grad.addColorStop(1,'#c7ad89');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h)}
-    // Ombre portée, construite sur le plan du sol.
-    const shadow=[[-9,-.55,-6],[11,-.55,-6],[12,-.55,8],[-4,-.55,9]].map(project);ctx.save();ctx.filter='blur(9px)';polygon(shadow,'#273e3730');ctx.restore();
-    const faces=scene.filter(f=>roof||f.kind!=='roof').map(f=>{const ps=f.points.map(project);return {...f,ps,depth:ps.reduce((a,p)=>a+p[2],0)/ps.length}}).sort((a,b)=>a.kind==='ground'&&b.kind!=='ground'?-1:b.kind==='ground'&&a.kind!=='ground'?1:b.depth-a.depth);
-    faces.forEach(f=>polygon(f.ps,f.color,f.kind==='plant'?null:f.color));
-    if(evening){ctx.save();ctx.globalCompositeOperation='soft-light';ctx.fillStyle='#dfad71';ctx.fillRect(0,0,w,h);ctx.restore()}
-    // Repère d’orientation relatif, sans indication nord géographique.
-    ctx.save();ctx.translate(w-32,35);ctx.rotate(-yaw);ctx.strokeStyle='#62736688';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(12,0);ctx.moveTo(0,-12);ctx.lineTo(0,12);ctx.stroke();ctx.fillStyle='#75826e';ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(-3,-8);ctx.lineTo(3,-8);ctx.fill();ctx.restore();
+  function rgb(color){if(color.startsWith('#')){const n=parseInt(color.slice(1),16);return [n>>16,(n>>8)&255,n&255].map(v=>v/255)}return color.match(/[\d.]+/g).map(Number).map(v=>v/255)}
+  function draw(){frame=0;if(!w||!h)return;gl.clearColor(evening?.52:0,evening?.55:0,evening?.51:0,evening?1:0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform3f(light,evening?1.03:1,evening?.93:1,evening?.78:1);
+    const vertices=[];for(const f of scene){if(!roof&&f.kind==='roof')continue;const color=rgb(f.color),ps=f.points.map(project);for(let i=1;i<ps.length-1;i++)for(const p of [ps[0],ps[i],ps[i+1]])vertices.push(p[0]/w*2-1,1-p[1]/h*2,p[2]/40,...color)}
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,vertices.length/6);
   }
   function schedule(){if(!frame)frame=requestAnimationFrame(draw)}
-  function resize(){const r=canvas.getBoundingClientRect();w=r.width;h=r.height;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);schedule()}
+  function resize(){const r=canvas.getBoundingClientRect();w=r.width;h=r.height;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);gl.viewport(0,0,canvas.width,canvas.height);schedule()}
+  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();document.querySelector('#model-instructions').textContent='Affichage 3D interrompu. Rechargez la page pour reprendre.'});
   new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw,pitch};if(e.pointerType!=='touch')canvas.setPointerCapture(e.pointerId)});
   canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(e.pointerType==='touch'&&Math.abs(dy)>Math.abs(dx)&&Math.abs(dx)<10)return;yaw=drag.yaw+dx*.009;pitch=Math.max(.25,Math.min(.95,drag.pitch-dy*.004));schedule()});

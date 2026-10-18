@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#001a3c">
+  <title>Administration — MAFOS Holding</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="admin.css">
+  <script type="module" src="admin.js"></script>
+</head>
+<body class="admin">
+  <header class="admin-header">
+    <a class="brand" href="../"><img class="brand-logo" src="../assets/logo-mafos.webp" width="861" height="220" alt="MAFOS Holding, retour au site"></a>
+    <span class="admin-title">Administration</span>
+    <div class="admin-user" id="admin-user" hidden><span id="admin-email"></span><button class="button button-outline" id="sign-out">Déconnexion</button></div>
+  </header>
+  <main class="admin-main">
+    <p id="admin-loading" class="admin-note">Chargement…</p>
+
+    <section id="login-view" class="admin-card login-card" hidden>
+      <h1>Connexion</h1>
+      <p class="admin-note">Espace réservé aux administrateurs du site.</p>
+      <form id="login-form"><label>E-mail<input name="email" type="email" required autocomplete="username"></label><label>Mot de passe<input name="password" type="password" required autocomplete="current-password"></label><button class="button button-navy" type="submit">Se connecter</button><p id="login-error" class="form-error" role="alert"></p></form>
+    </section>
+
+    <section id="denied-view" class="admin-card login-card" hidden>
+      <h1>Accès refusé</h1>
+      <p class="admin-note">Ce compte n’a pas les droits d’administration. Demandez à un administrateur de l’ajouter.</p>
+    </section>
+
+    <section id="app-view" hidden>
+      <div class="admin-tabs" role="tablist" aria-label="Rubriques">
+        <button role="tab" id="tab-properties" aria-selected="true" aria-controls="panel-properties">Annonces <span id="count-properties"></span></button>
+        <button role="tab" id="tab-requests" aria-selected="false" aria-controls="panel-requests">Demandes <span id="count-requests"></span></button>
+      </div>
+      <div id="panel-properties" role="tabpanel" aria-labelledby="tab-properties">
+        <div class="admin-toolbar"><h1>Annonces</h1><button class="button button-gold" id="new-property">Nouvelle annonce <span aria-hidden="true">+</span></button></div>
+        <div id="property-list" class="admin-list"></div>
+      </div>
+      <div id="panel-requests" role="tabpanel" aria-labelledby="tab-requests" hidden>
+        <div class="admin-toolbar"><h1>Demandes de contact</h1><label class="admin-filter">Statut <select id="request-filter"><option value="">Toutes</option><option value="nouveau">Nouvelles</option><option value="en_cours">En cours</option><option value="traite">Traitées</option></select></label></div>
+        <div id="request-list" class="admin-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="property-editor" aria-labelledby="editor-title"><button class="dialog-close" aria-label="Fermer l’éditeur">×</button><div class="dialog-inner">
+    <h2 id="editor-title">Nouvelle annonce</h2>
+    <form id="property-form" class="editor-grid">
+      <label class="span-all">Titre<input name="title" required minlength="3" maxlength="120"></label>
+      <label>Transaction<select name="transaction"><option>Vente</option><option>Location</option></select></label>
+      <label>Type de bien<select name="type"><option>Villa</option><option>Appartement</option><option>Terrain</option><option>Immeuble</option><option>Bureau</option></select></label>
+      <label>Point fort<input name="feature" maxlength="60" placeholder="Ex. Jardin & piscine"></label>
+      <label>Région<input name="region" required minlength="2" maxlength="60" list="list-regions"></label>
+      <label>Ville<input name="city" required minlength="2" maxlength="60" list="list-cities"></label>
+      <label>Quartier<input name="district" maxlength="60" list="list-districts"></label>
+      <label>Prix en FCFA, interne (jamais affiché sur le site)<input name="price" type="number" min="1" step="1" placeholder="Facultatif"></label>
+      <label>Superficie (m²)<input name="area" type="number" min="1" step="1" required></label>
+      <label>Type de visuel<input name="visual" maxlength="60" value="Photo"></label>
+      <label>Chambres ou espaces<input name="rooms" type="number" min="0" step="1" value="0"></label>
+      <label>Salles d’eau<input name="baths" type="number" min="0" step="1" value="0"></label>
+      <label>Ordre d’affichage<input name="sort_order" type="number" step="1" value="100"></label>
+      <label class="span-all">Description<textarea name="description" rows="5" maxlength="3000"></textarea></label>
+      <div class="span-all editor-image"><img id="image-preview" alt="Aperçu de la photo" hidden><label>Nouvelle photo (WebP, JPEG ou PNG, 5 Mo max.)<input name="file" type="file" accept="image/webp,image/jpeg,image/png"></label><label>Ou image existante (nom de fichier ou URL)<input name="image" maxlength="500"></label></div>
+      <div class="span-all editor-checks"><label class="check"><input type="checkbox" name="published" checked> Publiée sur le site</label><label class="check"><input type="checkbox" name="demo"> Fiche de démonstration (mentions « fictif »)</label></div>
+      <p id="editor-error" class="form-error span-all" role="alert"></p>
+      <div class="span-all editor-actions"><button type="button" class="button button-outline" id="editor-cancel">Annuler</button><button type="submit" class="button button-navy">Enregistrer</button></div>
+    </form>
+  </div></dialog>
+  <datalist id="list-regions"></datalist><datalist id="list-cities"></datalist><datalist id="list-districts"></datalist>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

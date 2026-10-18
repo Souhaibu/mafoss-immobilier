@@ -12,6 +12,12 @@ Prompt villa : illustration architecturale réaliste d’une villa urbaine ficti
 
 Prompt appartement : illustration architecturale réaliste d’un appartement fictif inspiré de Mermoz à Dakar, séjour ouvert sur terrasse plantée ombragée, tissu urbain bas en arrière-plan, travertin, noyer, lin clair, lumière solaire sénégalaise. Sans texte, logo ni monument étranger.
 
-`residence-concept.svg`, `terrain-concept.svg`, `favicon.svg`, monogramme HTML et géométrie 3D : créations vectorielles / programmatiques originales pour cette maquette. Les schémas sont étiquetés conceptuels, ne sont ni plans cadastraux ni plans techniques. Le monogramme ne constitue pas le logo officiel.
+## Logo
+
+`logo-mafos.webp` (fonds clairs), `logo-mafos-light.webp` (fonds sombres, texte éclairci) et `favicon.svg` (pictogramme du logo) : dérivés du logo MAFOS Holding fourni le 17 octobre 2026, dont l’original est conservé dans `source-assets/logo-mafos-holding.webp`. Couleurs de référence : bleu nuit `#001a3c`, bleu du pictogramme `#003668` → `#000f29`, or `#e3c259` (dégradé `#f8d487` → `#a27a25`).
+
+## Créations du prototype
+
+`residence-concept.svg`, `terrain-concept.svg` et géométrie 3D : créations vectorielles / programmatiques originales pour cette maquette. Les schémas sont étiquetés conceptuels, ne sont ni plans cadastraux ni plans techniques.
 
 Aucune photographie immobilière authentifiée et autorisée par MAFOSS n’a été fournie. Remplacer les illustrations au fur et à mesure de la réception des photos et autorisations. Ne pas employer d’images d’annonces tierces sans droits.

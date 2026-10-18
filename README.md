@@ -45,6 +45,14 @@ insert into public.admin_users (user_id) select id from auth.users where email =
 
 Recommandé : désactiver les inscriptions publiques (*Authentication › Sign In / Providers › Allow new users to sign up*). Un compte inscrit sans être dans `admin_users` n’a de toute façon aucun droit supplémentaire.
 
+## Hébergement Vercel
+
+Site en ligne : https://mafosholding.vercel.app (projet Vercel `lelegance-ancree-au-senegal`, équipe SNDEV). Le projet est relié au dépôt GitHub `Souhaibu/mafoss-immobilier` : chaque envoi sur `main` déploie la production.
+
+`vercel.json` fixe la configuration : build `npm run build`, dossier publié `dist`, adresses en `.html` conservées (`cleanUrls: false`), redirection `/admin` → `/admin/`, en-têtes de sécurité (CSP limitée au site, à Supabase et à jsDelivr pour l’admin ; interdiction d’intégration en iframe ; `nosniff` ; `Referrer-Policy` ; `Permissions-Policy`), cache de 7 jours pour `/assets/`, admin en `noindex` et `no-store`.
+
+Si un nouveau service externe est ajouté (police, statistiques, carte…), ajouter son domaine à la CSP de `vercel.json`, sinon le navigateur le bloquera. L’adresse du site (canonical, sitemap) est définie par `base` dans `scripts/build-pages.mjs`.
+
 ## Éléments à fournir avant exploitation commerciale
 
 Le logo MAFOS Holding et la palette existante sont conservés (voir `ASSETS.md`). Le cahier des charges initial n’a pas été fourni ; sa conformité complète n’est pas affirmée. Restent à fournir : vraies annonces avec photos autorisées, adresse du siège, RCCM/NINEA et responsable de publication, durée de conservation des demandes et domaine final. Voir `LANCEMENT.md`. Les pages de démonstration sont volontairement marquées `noindex` ; enlever cette directive dans le générateur seulement lorsque les contenus réels et les mentions sont prêts. Le formulaire dispose d’un champ piège mais pas d’une limite de fréquence côté serveur.

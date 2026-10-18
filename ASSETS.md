@@ -6,7 +6,7 @@
 
 ## Illustrations créées pour le projet
 
-`villa-concept.webp` et `apartment-concept.webp` : images générées avec l’outil intégré Imagegen le 17 octobre 2026 ; pas de photographie tierce utilisée en référence. Personnes fictives, aucun lien avec des clients ou salariés de MAFOSS. Présentation explicite « Illustration IA ». Aucun bien réel, emplacement exact ou réalisation n’est attesté. Images utilisées comme ambiances sur plusieurs fiches fictives. Masters PNG dans `source-assets/`.
+`villa-concept.webp` et `apartment-concept.webp` : images générées avec l’outil intégré Imagegen le 17 octobre 2026 ; pas de photographie tierce utilisée en référence. Personnes fictives, aucun lien avec des clients ou salariés de MAFOSS. Présentation publique « Illustration conceptuelle ». Aucun bien réel, emplacement exact ou réalisation n’est attesté. Images utilisées comme ambiances sur plusieurs fiches fictives. Masters PNG dans `source-assets/`.
 
 Prompt villa : illustration architecturale réaliste d’une villa urbaine fictive inspirée de Ngor / Almadies à Dakar, deux niveaux, toits plats, pierre claire, enduit minéral, brise-soleil en bois, grandes terrasses, jardin tropical, piscine, lumière dakaroise de fin d’après-midi ; une conseillère et un couple sénégalais fictifs, tenue contemporaine. Sans texte, logo, clichés touristiques, villa américaine ou gratte-ciel de Dubaï.
 

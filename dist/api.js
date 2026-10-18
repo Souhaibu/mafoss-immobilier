@@ -6,7 +6,8 @@ const columns='id,title,region,city,district,type,transaction,area,rooms,baths,i
 export async function fetchProperties(){
   const response=await fetch(`${rest}/properties?select=${columns}&published=eq.true&order=sort_order.asc,created_at.desc`,{headers,signal:AbortSignal.timeout(12000)});
   if(!response.ok)throw new Error(`Catalogue indisponible (${response.status})`);
-  return response.json();
+  const properties=await response.json();
+  return properties.map(property=>typeof property.visual==='string'?{...property,visual:property.visual.replace(/illustration\s+IA\b/gi,'Illustration conceptuelle')}:property);
 }
 export async function sendContactRequest(request){
   const response=await fetch(`${rest}/contact_requests`,{method:'POST',headers:{...headers,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(request),signal:AbortSignal.timeout(15000)});
